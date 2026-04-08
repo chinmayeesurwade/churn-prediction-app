@@ -4,29 +4,44 @@ import joblib
 import os
 
 # ==============================
-# BASE DIR
+# BASE PATH
 # ==============================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ==============================
-# LOAD FILES
+# LOAD MODELS SAFELY
 # ==============================
-model = joblib.load(os.path.join(BASE_DIR, "models", "model.pkl"))
-scaler = joblib.load(os.path.join(BASE_DIR, "models", "scaler.pkl"))
-feature_columns = joblib.load(os.path.join(BASE_DIR, "models", "features.pkl"))
+model_path = os.path.join(BASE_DIR, "models", "model.pkl")
+scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
+features_path = os.path.join(BASE_DIR, "models", "features.pkl")
+
+if not os.path.exists(model_path):
+    st.error("model.pkl not found in models folder")
+    st.stop()
+
+if not os.path.exists(scaler_path):
+    st.error("scaler.pkl not found in models folder")
+    st.stop()
+
+if not os.path.exists(features_path):
+    st.error(" features.pkl not found in models folder")
+    st.stop()
+
+model = joblib.load(model_path)
+scaler = joblib.load(scaler_path)
+feature_columns = joblib.load(features_path)
+
 # ==============================
 # UI TITLE
 # ==============================
-
 st.title("Customer Churn Prediction System")
-st.caption("End-to-End ML Project | Built with Python, Scikit-learn, FastAPI, Streamlit")
+st.caption("End-to-End ML Project | Built with Python & Streamlit")
 
 st.write("### Enter Customer Details:")
 
 # ==============================
 # INPUT FIELDS
 # ==============================
-
 gender = st.selectbox("Gender", ["Male", "Female"])
 SeniorCitizen = st.selectbox("Senior Citizen", [0, 1])
 Partner = st.selectbox("Partner", ["Yes", "No"])
@@ -55,16 +70,14 @@ PaymentMethod = st.selectbox("Payment Method", [
     "Credit card (automatic)"
 ])
 
-MonthlyCharges = st.number_input("Monthly Charges", 0.0)
-TotalCharges = st.number_input("Total Charges", 0.0)
+MonthlyCharges = st.number_input("Monthly Charges", min_value=0.0)
+TotalCharges = st.number_input("Total Charges", min_value=0.0)
 
 # ==============================
-# PREDICTION BUTTON
+# PREDICTION
 # ==============================
-
 if st.button("Predict"):
 
-    # Create input dictionary
     input_data = {
         "gender": gender,
         "SeniorCitizen": SeniorCitizen,
@@ -87,13 +100,12 @@ if st.button("Predict"):
         "TotalCharges": TotalCharges
     }
 
-    # Convert to DataFrame
     df = pd.DataFrame([input_data])
 
-    # Encoding
+    # One-hot encoding
     df = pd.get_dummies(df)
 
-    # Align columns
+    # Align columns with training data
     df = df.reindex(columns=feature_columns, fill_value=0)
 
     # Scaling
@@ -102,7 +114,7 @@ if st.button("Predict"):
     # Prediction
     proba = model.predict_proba(df)[0][1]
 
-    # Risk logic
+    # Risk classification
     if proba < 0.3:
         risk = "Low"
     elif proba < 0.7:
@@ -111,33 +123,26 @@ if st.button("Predict"):
         risk = "High"
 
     # ==============================
-    # OUTPUT (COLORED)
+    # OUTPUT
     # ==============================
-
     st.write("## Result")
 
     if risk == "High":
-        st.error(f" High Risk Customer (Churn Probability: {proba:.2f})")
+        st.error(f"High Risk Customer (Churn Probability: {proba:.2f})")
     elif risk == "Medium":
-        st.warning(f" Medium Risk Customer (Churn Probability: {proba:.2f})")
+        st.warning(f"Medium Risk Customer (Churn Probability: {proba:.2f})")
     else:
-        st.success(f" Low Risk Customer (Churn Probability: {proba:.2f})")
+        st.success(f"Low Risk Customer (Churn Probability: {proba:.2f})")
 
-    # ==============================
-    # BUSINESS INSIGHTS
-    # ==============================
+    # Progress bar
+    st.progress(float(proba))
 
-    st.subheader(" Recommendation")
+    # Recommendation
+    st.subheader("Recommendation")
 
     if risk == "High":
-        st.write(" Immediate action required: Offer discounts, retention calls, or special plans.")
+        st.write("Offer discounts, retention calls, or special plans.")
     elif risk == "Medium":
-        st.write(" Engage customer with personalized offers and communication.")
+        st.write("Engage with personalized offers.")
     else:
-        st.write("Maintain satisfaction with loyalty programs and good service.")
-
-    # ==============================
-    # EXTRA: SHOW PROBABILITY BAR
-    # ==============================
-
-    st.progress(float(proba))
+        st.write("Maintain customer satisfaction.")
