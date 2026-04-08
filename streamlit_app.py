@@ -9,9 +9,9 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
-scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
-feature_columns = joblib.load(os.path.join(BASE_DIR, "features.pkl"))
+model = joblib.load(os.path.join(BASE_DIR, "models", "model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "models", "scaler.pkl"))
+feature_columns = joblib.load(os.path.join(BASE_DIR, "models", "features.pkl"))
 
 # ==============================
 # UI TITLE
