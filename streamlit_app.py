@@ -4,11 +4,13 @@ import joblib
 import os
 
 # ==============================
-# LOAD MODEL + FILES
+# BASE DIR
 # ==============================
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# ==============================
+# LOAD FILES
+# ==============================
 model = joblib.load(os.path.join(BASE_DIR, "models", "model.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "models", "scaler.pkl"))
 feature_columns = joblib.load(os.path.join(BASE_DIR, "models", "features.pkl"))
